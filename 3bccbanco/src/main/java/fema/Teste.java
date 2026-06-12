@@ -12,15 +12,12 @@ public class Teste {
         Connection cnn = null;
 
         try {
-            // ATENÇÃO: Mudamos para "mem:banco" para que funcione na nuvem (Replit) sem precisar do C:/ do Windows!
             cnn = DriverManager.getConnection("jdbc:h2:mem:banco;DB_CLOSE_DELAY=-1", "sa", "");
-            
-            // Criando as tabelas automaticamente na memória toda vez que o app iniciar
             inicializarBanco(cnn);
 
             TimeDao timeDao = new TimeDao(cnn);
             JogadorDao jogadorDao = new JogadorDao(cnn);
-            //PremioDao premioDao = new PremioDao(cnn);
+            PremioDao premioDao = new PremioDao(cnn); // Ativado!
 
             int opcao = -1;
 
@@ -32,11 +29,13 @@ public class Teste {
                 System.out.println("2 - Listar Todos os Times");
                 System.out.println("3 - Cadastrar Novo Jogador");
                 System.out.println("4 - Listar Todos os Jogadores");
+                System.out.println("5 - Cadastrar Novo Prêmio");
+                System.out.println("6 - Listar Todos os Prêmios");
                 System.out.println("0 - Sair do Sistema");
                 System.out.print("Escolha uma opção: ");
                 
                 opcao = scanner.nextInt();
-                scanner.nextLine(); // Limpa o buffer do teclado
+                scanner.nextLine(); 
 
                 switch (opcao) {
                     case 1:
@@ -100,6 +99,38 @@ public class Teste {
                         }
                         break;
 
+                    case 5:
+                        System.out.print("\nDigite o ID do Prêmio: ");
+                        int idPremio = scanner.nextInt();
+                        scanner.nextLine();
+                        System.out.print("Digite o Nome do Prêmio: ");
+                        String nomePremio = scanner.nextLine();
+                        System.out.print("Digite o Ano do Prêmio: ");
+                        int anoPremio = scanner.nextInt();
+                        System.out.print("Digite o ID do Jogador que ganhou este prêmio: ");
+                        int idJogFK = scanner.nextInt();
+
+                        Premio p = new Premio();
+                        p.setId(idPremio);
+                        p.setNome(nomePremio);
+                        p.setAno(anoPremio);
+                        p.setJogadorId(idJogFK);
+                        premioDao.inserir(p);
+                        System.out.println("👉 Prêmio cadastrado com sucesso!");
+                        break;
+
+                    case 6:
+                        System.out.println("\n--- LISTA DE PRÊMIOS ---");
+                        List<Premio> premios = premioDao.recuperar();
+                        if (premios.isEmpty()) {
+                            System.out.println("Nenhum prêmio cadastrado.");
+                        } else {
+                            for (Premio pr : premios) {
+                                System.out.println("ID: " + pr.getId() + " | Nome: " + pr.getNome() + " | Ano: " + pr.getAno() + " | ID Jogador: " + pr.getJogadorId());
+                            }
+                        }
+                        break;
+
                     case 0:
                         System.out.println("\nEncerrando o sistema... Até logo!");
                         break;
@@ -122,7 +153,6 @@ public class Teste {
         }
     }
 
-    // Função auxiliar para criar as tabelas direto na memória na nuvem
     private static void inicializarBanco(Connection cnn) throws Exception {
         String sqlTime = "CREATE TABLE IF NOT EXISTS TIME (ID INTEGER NOT NULL PRIMARY KEY, NOME VARCHAR(100), CIDADE VARCHAR(100));";
         String sqlJogador = "CREATE TABLE IF NOT EXISTS JOGADOR (ID INTEGER NOT NULL PRIMARY KEY, NOME VARCHAR(100), POSICAO VARCHAR(50), TIME_ID INTEGER NOT NULL, CONSTRAINT JOGADOR_TIME_FK FOREIGN KEY (TIME_ID) REFERENCES TIME (ID));";
