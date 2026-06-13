@@ -12,7 +12,7 @@ public class Teste {
         Connection cnn = null;
 
         try {
-            cnn = DriverManager.getConnection("jdbc:h2:mem:banco;DB_CLOSE_DELAY=-1", "sa", "");
+            cnn = DriverManager.getConnection("jdbc:h2:./banco", "sa", "");
             inicializarBanco(cnn);
 
             TimeDao timeDao = new TimeDao(cnn);
